@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organigrama</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.7.0/dist/css/bootstrap.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.0.0/dist/markdown-it.min.js"></script>
+
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            background-image: url('images/Const_Archdaily-8.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        #introduccion {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .description p {
+            margin-bottom: 0.5rem;
+        }
+
+        .description li {
+            margin-bottom: 0.25rem;
+        }
+
+        .chart-container,
+        .svg-chart-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .bg-green-300 {
+            background-color: #d4f1d9;
+        }
+
+        .bg-amber-200 {
+            background-color: #f9e2b3;
+        }
+
+        .bg-indigo-300 {
+            background-color: #dbe6f6;
+        }
+
+        .bg-red-200 {
+            background-color: #fbb6b6;
+        }
+
+        .bg-indigo-100 {
+            background-color: #e0e7ff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card overflow-y-auto fixed top-6 left-6 w-80 h-[580px] z-10 bg-white border rounded-lg shadow-lg">
+        <div id="introduccion" class="h-full flex flex-col justify-end p-4">
+            <img src="images/Muni.jpeg" alt="Descripción de la imagen"
+                class="w-full h-auto mb-4 rounded-lg shadow-md">
+            <h1 class="text-4xl font-bold mb-4 text-blue-700">Organigrama Institucional</h1>
+            <p class="text-sm text-gray-700">
+                Explora la estructura y dinámica de la Ilustre Municipalidad de Constitución a través de nuestro
+                organigrama. Bienvenido a conocer la red que sostiene nuestra labor en pro del desarrollo y bienestar de
+                Constitución.
+            </p>
+        </div>
+
+
+        <div id="infocard" class="hidden h-full p-4 flex flex-col">
+            <div class="image w-full">
+                <img class="rounded-full aspect-square object-cover w-full" src="">
+            </div>
+            <div class="mt-2 mb-4">
+                <h2 id="puesto" class="font-bold text-2xl leading-6 text-blue-800">
+                    <!-- Placeholder puesto -->
+                </h2>
+                <img src="person.svg" class="w-4 h-4 -mt-1 inline-block">
+                <span class="persona text-sm uppercase text-gray-600">
+                    <!-- Placeholder nombre -->
+                </span>
+            </div>
+            <h2 class="uppercase text-xs font-bold text-gray-400">Funciones</h2>
+            <div class="description text-xs flex-1 pb-4 text-gray-600">
+                <!-- Placeholder descripcion -->
+            </div>
+            <div class="legal my-2">
+                <ul>
+                    <!-- Placeholder links legales -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container"></div>
+
+    <script>
+        var md = window.markdownit();
+
+        d3.csv('data.csv')
+            .then((data) => {
+                const orgChart = new d3.OrgChart()
+                    .nodeHeight((d) => 85 + 25)
+                    .nodeWidth((d) => 220 + 2)
+                    .childrenMargin((d) => 50)
+                    .compactMarginBetween((d) => 35)
+                    .compactMarginPair((d) => 30)
+                    .neighbourMargin((a, b) => 20)
+                    .nodeContent(function (d, i, arr, state) {
+                        let bgcolor = 'bg-gray-50';
+
+                        if (d.data.category === 'alcalde') {
+                            bgcolor = 'bg-green-300';
+                        }
+
+                        if (d.data.category === 'concejo') {
+                            bgcolor = 'bg-amber-200';
+                        }
+                        if (d.data.category === 'jpl') {
+                            bgcolor = 'bg-indigo-300';
+                        }
+                        if (d.data.category === 'admin') {
+                            bgcolor = 'bg-red-200';
+                        }
+                        if (d.data.category === 'direccion') {
+                            bgcolor = 'bg-indigo-100';
+                        }
+
+                        return `
+              <div class="w-56 h-28 pt-6 px-px">
+                  <div class="${bgcolor} font-sans rounded-lg border w-56 h-[84px] pt-5 -ml-px">
+                      <div class="-mt-12">
+                          <img src="${d.data.image || 'images/placeholder.jpg'}" class="rounded-full object-cover ml-5 w-12 h-12"/>
+                      </div>
+                      <div class="text-base text-gray-900 ml-5">
+                          ${d.data.name}
+                      </div>
+                      <div class="text-[9px] text-gray-600 ml-5">
+                          ${d.data.position}
+                      </div>
+                  </div>
+              </div>
+          `;
+                    })
+                    .onNodeClick(d => {
+                        const cardIntroduccion = document.querySelector('#introduccion');
+                        const cardInfocard = document.querySelector('#infocard');
+                        const infocardImage = document.querySelector('#infocard .image img');
+                        const infocardPuesto = document.querySelector('#infocard #puesto');
+                        const infocardPersona = document.querySelector('#infocard .persona');
+                        const infocardDescription = document.querySelector('#infocard .description');
+                        const infocardLegal = document.querySelector('#infocard .legal ul');
+
+                        cardIntroduccion.classList.add('hidden');
+                        cardInfocard.classList.remove('hidden');
+
+                        infocardImage.setAttribute('src', `${d.data.image}`);
+                        infocardPuesto.innerHTML = `${d.data.position}`;
+                        infocardPersona.innerHTML = `${d.data.name}`;
+                        infocardDescription.innerHTML = md.render(`${d.data.description}`);
+
+                        infocardLegal.innerHTML = "";
+                        let links = JSON.parse(d.data.legal || "[]");
+                        links.forEach((item) => {
+                            infocardLegal.innerHTML += `
+                            <li class="mr-1 inline-block">
+                                <a href="${item.link}" title="${item.title}" target="_blank" class="block rounded hover:bg-blue-200 focus:ring-blue-200">
+                                    <img class="h-8" src="legal.svg">
+                                </a>
+                            </li>
+                    `;
+                        })
+                    })
+                    .container('.chart-container')
+                    .data(data)
+                    .render();
+            });
+    </script>
+</body>
+
+</html>
